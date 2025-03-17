@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACS查询积分</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    h1 {
+      color: #4CAF50;
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    p {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    input[type="text"], textarea {
+      width: 80%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px 25px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    td {
+      background-color: #f9f9f9;
+    }
+    .message {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #ffcc00;
+      color: #333;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 16px;
+      color: #555;
+    }
+    .footer a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ACS查询积分</h1>
+  <p>请输入以太坊地址（每行一个），然后点击“查询”获取ACS信息：</p>
+  <textarea id="addresses" rows="6" placeholder="请输入地址..."></textarea><br>
+  <button onclick="batchQuery()">查询</button>
+
+  <div id="message" class="message" style="display:none;">
+    正在查询，请稍等...
+  </div>
+
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>用户地址</th>
+        <th>总积分 (ACS)</th>
+        <th>昨日排名</th>
+        <th>今日排名</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="footer">
+    <p>作者推特：<a href="https://x.com/0xXIAOc" target="_blank">@0xXIAOc</a></p>
+  </div>
+
+  <script>
+    // GraphQL endpoint
+    const endpoint = 'https://acs-graphql.astar.network/graphql';
+
+    async function batchQuery() {
+      const addresses = document.getElementById('addresses').value.trim().split('\n');
+      const resultTableBody = document.querySelector('#resultTable tbody');
+      resultTableBody.innerHTML = ''; // 清空之前的查询结果
+
+      // 显示查询提示信息
+      document.getElementById('message').style.display = 'block';
+
+      for (const address of addresses) {
+        const query = `
+          query {
+            getUserAcsInfoByAddress(userAddress: "${address.trim()}") {
+              userAddress
+              totalAcsAmount
+              yesterdayRank
+              todayRank
+            }
+          }
+        `;
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query })
+        });
+
+        const data = await response.json();
+
+        // 检查响应数据是否有效
+        if (data.data && data.data.getUserAcsInfoByAddress) {
+          const userData = data.data.getUserAcsInfoByAddress;
+          const row = document.createElement('tr');
+
+          row.innerHTML = `
+            <td>${userData.userAddress}</td>
+            <td>${userData.totalAcsAmount}</td>
+            <td>${userData.yesterdayRank}</td>
+            <td>${userData.todayRank}</td>
+          `;
+
+          resultTableBody.appendChild(row);
+        } else {
+          // 处理用户数据无效或查询错误的情况
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${address}</td>
+            <td colspan="3">未找到数据或查询错误</td>
+          `;
+          resultTableBody.appendChild(row);
+        }
+      }
+
+      // 隐藏查询提示信息
+      document.getElementById('message').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
