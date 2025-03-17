@@ -32,7 +32,7 @@
     }
     button {
       padding: 12px 25px;
-      background-color: #4CAF50;
+      background-color: #007BFF; /* 新的按钮背景颜色 */
       color: white;
       border: none;
       border-radius: 5px;
@@ -42,7 +42,7 @@
       margin-bottom: 20px;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #0056b3; /* 新的按钮悬停颜色 */
     }
     table {
       width: 100%;
@@ -111,6 +111,9 @@
     <tbody></tbody>
   </table>
 
+  <!-- 批量查询积分详细信息入口按钮 -->
+  <button onclick="viewDetailedInfo()">批量查询积分详细信息入口</button>
+
   <div class="footer">
     <p>作者推特：<a href="https://x.com/0xXIAOc" target="_blank">@0xXIAOc</a></p>
   </div>
@@ -175,6 +178,11 @@
 
       // 隐藏查询提示信息
       document.getElementById('message').style.display = 'none';
+    }
+
+    // 打开新网站查看积分详细信息
+    function viewDetailedInfo() {
+      window.open("https://ascccc.vercel.app/", "_blank");
     }
   </script>
 
