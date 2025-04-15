@@ -139,91 +139,92 @@
     <p>作者推特：<a href="https://x.com/0xXIAOc" target="_blank">@0xXIAOc</a></p>
   </div>
 
-  <script>
-    // GraphQL endpoint
-    const endpoint = 'https://acs-graphql.astar.network/graphql';
+<script>
+  // GraphQL endpoint
+  const endpoint = 'https://acs-graphql.astar.network/graphql';
 
-    async function batchQuery() {
-      const addresses = document.getElementById('addresses').value.trim().split('\n');
-      const resultTableBody = document.querySelector('#resultTable tbody');
-      resultTableBody.innerHTML = ''; // 清空之前的查询结果
+  async function batchQuery() {
+    const addresses = document.getElementById('addresses').value.trim().split('\n');
+    const resultTableBody = document.querySelector('#resultTable tbody');
+    resultTableBody.innerHTML = ''; // 清空之前的查询结果
 
-      let totalAcs = 0;  // 总积分
-      let nonZeroCount = 0;  // 有积分的地址数量
+    let totalAcs = 0;  // 总积分
+    let nonZeroCount = 0;  // 有积分的地址数量
 
-      // 显示查询提示信息
-      document.getElementById('message').style.display = 'block';
+    // 显示查询提示信息
+    document.getElementById('message').style.display = 'block';
 
-      // 更新查询的地址数量
-      document.getElementById('walletCount').innerText = `查询钱包数量: ${addresses.length}`;
+    // 更新查询的地址数量
+    document.getElementById('walletCount').innerText = `查询钱包数量: ${addresses.length}`;
 
-      for (const address of addresses) {
-        const query = ` 
-          query {
-            getUserAcsInfoByAddress(userAddress: "${address.trim()}") {
-              userAddress
-              totalAcsAmount
-              yesterdayRank
-              todayRank
-            }
+    for (const address of addresses) {
+      const query = ` 
+        query {
+          getUserAcsInfoByAddress(userAddress: "${address.trim()}") {
+            userAddress
+            totalAcsAmount
+            yesterdayRank
+            todayRank
           }
+        }
+      `;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await response.json();
+
+      // 检查响应数据是否有效
+      if (data.data && data.data.getUserAcsInfoByAddress) {
+        const userData = data.data.getUserAcsInfoByAddress;
+        const row = document.createElement('tr');
+
+        // 累加积分
+        totalAcs += userData.totalAcsAmount;
+
+        // 检查是否有积分
+        if (userData.totalAcsAmount > 0) {
+          nonZeroCount++;
+        }
+
+        row.innerHTML = `
+          <td><a href="https://debank.com/profile/${userData.userAddress}" target="_blank">${userData.userAddress}</a></td>
+          <td>${userData.totalAcsAmount}</td>
+          <td>${userData.yesterdayRank}</td>
+          <td>${userData.todayRank}</td>
         `;
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query })
-        });
-
-        const data = await response.json();
-
-        // 检查响应数据是否有效
-        if (data.data && data.data.getUserAcsInfoByAddress) {
-          const userData = data.data.getUserAcsInfoByAddress;
-          const row = document.createElement('tr');
-
-          // 累加积分
-          totalAcs += userData.totalAcsAmount;
-
-          // 检查是否有积分
-          if (userData.totalAcsAmount > 0) {
-            nonZeroCount++;
-          }
-
-          row.innerHTML = `
-            <td>${userData.userAddress}</td>
-            <td>${userData.totalAcsAmount}</td>
-            <td>${userData.yesterdayRank}</td>
-            <td>${userData.todayRank}</td>
-          `;
-
-          resultTableBody.appendChild(row);
-        } else {
-          // 处理用户数据无效或查询错误的情况
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${address}</td>
-            <td colspan="3">未找到数据或查询错误</td>
-          `;
-          resultTableBody.appendChild(row);
-        }
+        resultTableBody.appendChild(row);
+      } else {
+        // 处理用户数据无效或查询错误的情况
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${address}</td>
+          <td colspan="3">未找到数据或查询错误</td>
+        `;
+        resultTableBody.appendChild(row);
       }
-
-      // 更新显示的统计信息
-      document.getElementById('nonZeroWalletCount').innerText = `有积分的地址数量: ${nonZeroCount}`;
-      document.getElementById('totalAcs').innerText = `总积分: ${totalAcs}`;
-
-      // 隐藏查询提示信息
-      document.getElementById('message').style.display = 'none';
     }
 
-    // 打开新网站查看积分详细信息
-    function viewDetailedInfo() {
-      window.open("https://ascccc.vercel.app/", "_blank");
-    }
-  </script>
+    // 更新显示的统计信息
+    document.getElementById('nonZeroWalletCount').innerText = `有积分的地址数量: ${nonZeroCount}`;
+    document.getElementById('totalAcs').innerText = `总积分: ${totalAcs}`;
+
+    // 隐藏查询提示信息
+    document.getElementById('message').style.display = 'none';
+  }
+
+  // 打开新网站查看积分详细信息
+  function viewDetailedInfo() {
+    window.open("https://ascccc.vercel.app/", "_blank");
+  }
+</script>
+
 
 </body>
 </html>
