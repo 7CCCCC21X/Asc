@@ -32,7 +32,7 @@
     }
     button {
       padding: 12px 25px;
-      background-color: #007BFF; /* 新的按钮背景颜色 */
+      background-color: #007BFF;
       color: white;
       border: none;
       border-radius: 5px;
@@ -42,7 +42,7 @@
       margin-bottom: 20px;
     }
     button:hover {
-      background-color: #0056b3; /* 新的按钮悬停颜色 */
+      background-color: #0056b3;
     }
     table {
       width: 100%;
@@ -126,7 +126,6 @@
     <tbody></tbody>
   </table>
 
-  <!-- 批量查询积分详细信息入口按钮 -->
   <button onclick="viewDetailedInfo()">批量查询积分详细信息入口</button>
 
   <div class="summary">
@@ -140,21 +139,18 @@
   </div>
 
 <script>
-  // GraphQL endpoint
-  const endpoint = 'https://acs-graphql.astar.network/graphql';
+  // 使用本地代理路径，避免 CORS 问题
+  const endpoint = '/api/proxy';
 
   async function batchQuery() {
     const addresses = document.getElementById('addresses').value.trim().split('\n');
     const resultTableBody = document.querySelector('#resultTable tbody');
-    resultTableBody.innerHTML = ''; // 清空之前的查询结果
+    resultTableBody.innerHTML = '';
 
-    let totalAcs = 0;  // 总积分
-    let nonZeroCount = 0;  // 有积分的地址数量
+    let totalAcs = 0;
+    let nonZeroCount = 0;
 
-    // 显示查询提示信息
     document.getElementById('message').style.display = 'block';
-
-    // 更新查询的地址数量
     document.getElementById('walletCount').innerText = `查询钱包数量: ${addresses.length}`;
 
     for (const address of addresses) {
@@ -179,18 +175,12 @@
 
       const data = await response.json();
 
-      // 检查响应数据是否有效
       if (data.data && data.data.getUserAcsInfoByAddress) {
         const userData = data.data.getUserAcsInfoByAddress;
         const row = document.createElement('tr');
 
-        // 累加积分
         totalAcs += userData.totalAcsAmount;
-
-        // 检查是否有积分
-        if (userData.totalAcsAmount > 0) {
-          nonZeroCount++;
-        }
+        if (userData.totalAcsAmount > 0) nonZeroCount++;
 
         row.innerHTML = `
           <td><a href="https://debank.com/profile/${userData.userAddress}" target="_blank">${userData.userAddress}</a></td>
@@ -198,10 +188,8 @@
           <td>${userData.yesterdayRank}</td>
           <td>${userData.todayRank}</td>
         `;
-
         resultTableBody.appendChild(row);
       } else {
-        // 处理用户数据无效或查询错误的情况
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${address}</td>
@@ -211,20 +199,15 @@
       }
     }
 
-    // 更新显示的统计信息
     document.getElementById('nonZeroWalletCount').innerText = `有积分的地址数量: ${nonZeroCount}`;
     document.getElementById('totalAcs').innerText = `总积分: ${totalAcs}`;
-
-    // 隐藏查询提示信息
     document.getElementById('message').style.display = 'none';
   }
 
-  // 打开新网站查看积分详细信息
   function viewDetailedInfo() {
     window.open("https://ascccc.vercel.app/", "_blank");
   }
 </script>
-
 
 </body>
 </html>
